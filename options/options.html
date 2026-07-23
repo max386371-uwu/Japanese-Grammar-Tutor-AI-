@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Japanese Grammar Tutor — Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <main class="jgto-wrap">
+    <h1>Japanese Grammar Tutor</h1>
+
+    <section class="jgto-card">
+      <h2>Groq API</h2>
+      <label class="jgto-field">
+        <span>API key</span>
+        <input id="jgto-api-key" type="password" placeholder="gsk_..." autocomplete="off" />
+      </label>
+      <p class="jgto-hint">
+        Stored locally and only ever used by the background script to call Groq directly.
+        Get a key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.
+      </p>
+      <label class="jgto-field">
+        <span>Model</span>
+        <select id="jgto-model">
+          <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+          <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (faster, less detailed)</option>
+        </select>
+      </label>
+      <label class="jgto-field">
+        <span>Default explanation level</span>
+        <select id="jgto-mode">
+          <option value="beginner">Beginner (N5-N4)</option>
+          <option value="intermediate">Intermediate (N3-N2)</option>
+          <option value="advanced">Advanced (N1)</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="jgto-card">
+      <h2>Appearance</h2>
+      <div class="jgto-grid">
+        <label class="jgto-field">
+          <span>Font size (px)</span>
+          <input id="jgto-font-size" type="number" min="10" max="24" step="1" />
+        </label>
+        <label class="jgto-field">
+          <span>Line spacing</span>
+          <input id="jgto-line-spacing" type="number" min="1.1" max="2.2" step="0.1" />
+        </label>
+        <label class="jgto-field">
+          <span>Popup width (px)</span>
+          <input id="jgto-popup-width" type="number" min="260" max="600" step="10" />
+        </label>
+        <label class="jgto-field">
+          <span>Popup max height (px)</span>
+          <input id="jgto-popup-max-height" type="number" min="200" max="800" step="10" />
+        </label>
+        <label class="jgto-field">
+          <span>Border radius (px)</span>
+          <input id="jgto-border-radius" type="number" min="0" max="24" step="1" />
+        </label>
+        <label class="jgto-field">
+          <span>Popup opacity</span>
+          <input id="jgto-popup-opacity" type="range" min="0.5" max="1" step="0.05" />
+        </label>
+        <label class="jgto-field">
+          <span>Text color</span>
+          <input id="jgto-text-color" type="color" />
+        </label>
+        <label class="jgto-field">
+          <span>Accent color</span>
+          <input id="jgto-accent-color" type="color" />
+        </label>
+        <label class="jgto-field">
+          <span>Popup background color</span>
+          <input id="jgto-bg-color" type="color" />
+        </label>
+      </div>
+      <label class="jgto-field">
+        <span>Font family</span>
+        <input id="jgto-font-family" type="text" placeholder="-apple-system, ..." />
+      </label>
+      <p class="jgto-hint">Any valid CSS font-family value — comma-separated fallbacks are fine.</p>
+    </section>
+
+    <section class="jgto-card">
+      <h2>Grammar detection</h2>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-explain-particles" />
+        <span>Explain particles (は, が, を, に, で, と…)</span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-explain-conjugations" />
+        <span>Explain conjugations</span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-explain-auxverbs" />
+        <span>Explain auxiliary verbs/adjectives (がたい, やすい, そうだ…)</span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-explain-slang" />
+        <span>Explain slang / casual speech</span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-highlight-grammar" />
+        <span>Highlight detected grammar directly in the sentence</span>
+      </label>
+      <label class="jgto-checkbox jgto-checkbox-disabled">
+        <input type="checkbox" disabled />
+        <span>Explain only unknown grammar <em>(coming soon)</em></span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-auto-expand" />
+        <span>Automatically expand all grammar explanations</span>
+      </label>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-auto-translation" />
+        <span>Automatically show translation</span>
+      </label>
+    </section>
+
+    <section class="jgto-card">
+      <h2>Other</h2>
+      <label class="jgto-checkbox">
+        <input type="checkbox" id="jgto-features-enabled" />
+        <span>Show the floating 説 button when Japanese text is selected</span>
+      </label>
+      <p class="jgto-hint">
+        Default hotkey: <kbd>Ctrl+Shift+A</kbd> (<kbd>Cmd+Shift+A</kbd> on Mac). To change it, open
+        <code>chrome://extensions/shortcuts</code> and find "Japanese Grammar Tutor". A right-click
+        menu entry ("説 Explain Japanese grammar") is also available on any text selection.
+      </p>
+      <button id="jgto-open-shortcuts" type="button">Open shortcut settings</button>
+    </section>
+
+    <section class="jgto-card">
+      <h2>Backup</h2>
+      <p class="jgto-hint">Save all your settings to a file, or restore them on another machine.</p>
+      <div class="jgto-button-row">
+        <button id="jgto-export" type="button">Export settings</button>
+        <button id="jgto-import" type="button">Import settings</button>
+        <input id="jgto-import-file" type="file" accept="application/json" hidden />
+      </div>
+    </section>
+
+    <div id="jgto-save-status" class="jgto-save-status"></div>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

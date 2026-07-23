@@ -1,0 +1,325 @@
+/* This stylesheet is declared in the manifest's content_scripts, which is
+   the ONLY way extension CSS reliably bypasses a page's Content-Security-
+   -Policy. The panel renders directly in the page (no Shadow DOM — see
+   panel.js for why), so this file resets inherited properties explicitly
+   under #jgt-panel-root instead of relying on shadow boundary isolation.
+   Colors/fonts/sizing are NOT hardcoded here except as fallbacks — the
+   real values come from CSS custom properties set inline by panel.js
+   from the user's settings (Options page). */
+
+#jgt-panel-root,
+#jgt-panel-root *,
+#jgt-trigger-button {
+  all: revert;
+  box-sizing: border-box !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  text-align: left !important;
+  white-space: normal !important;
+}
+
+#jgt-panel-root {
+  position: static;
+}
+
+/* ---------- Trigger button (説) ---------- */
+
+#jgt-trigger-button {
+  position: fixed !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 7px !important;
+  background: #1c3f6e !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  border: none !important;
+  box-shadow: 0 3px 10px rgba(28, 63, 110, 0.5) !important;
+  transition: transform 100ms ease, box-shadow 100ms ease !important;
+  z-index: 2147483647 !important;
+}
+
+#jgt-trigger-button:hover {
+  transform: translateY(-1px) scale(1.06) !important;
+  box-shadow: 0 5px 14px rgba(91, 155, 213, 0.55) !important;
+}
+
+/* ---------- Panel shell — compact, square-ish, Yomitan density ---------- */
+
+.jgt-panel {
+  /* Fallback values if panel.js somehow fails to set these inline —
+     matches the "deep dark, not pure black" + "medium blue" request. */
+  --jgt-bg: #1a1a20;
+  --jgt-bg-elevated: color-mix(in srgb, var(--jgt-bg) 92%, #ffffff 8%);
+  --jgt-text: #e9e9f0;
+  --jgt-text-muted: color-mix(in srgb, var(--jgt-text) 65%, var(--jgt-bg) 35%);
+  --jgt-border: color-mix(in srgb, var(--jgt-bg) 80%, #ffffff 20%);
+  --jgt-accent: #5b9bd5;
+  --jgt-radius: 16px;
+  --jgt-font-size: 15px;
+  --jgt-font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Segoe UI', Roboto, sans-serif;
+  --jgt-line-height: 1.6;
+
+  position: fixed !important;
+  /* top/left/width/maxHeight/opacity are set inline per-open by panel.js. */
+  display: flex !important;
+  flex-direction: column !important;
+  background: var(--jgt-bg) !important;
+  color: var(--jgt-text) !important;
+  border: 1px solid var(--jgt-border) !important;
+  border-radius: var(--jgt-radius) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.16) !important;
+  overflow: hidden !important;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  z-index: 2147483647 !important;
+  font-size: var(--jgt-font-size) !important;
+  font-family: var(--jgt-font-family) !important;
+  line-height: var(--jgt-line-height) !important;
+}
+
+.jgt-panel-open {
+  transform: translateY(0) scale(1);
+}
+
+.jgt-panel-body {
+  overflow-y: auto !important;
+  /* Balanced padding on all sides — text should never touch the edges. */
+  padding: 14px !important;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--jgt-bg) !important;
+}
+
+.jgt-status {
+  font-style: italic;
+  color: var(--jgt-text-muted) !important;
+}
+
+.jgt-status-error {
+  font-style: normal;
+  color: #e0736a !important;
+  font-weight: 600 !important;
+}
+
+/* ---------- Sentence + Show Translation ---------- */
+
+.jgt-sentence-section {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--jgt-border);
+}
+
+.jgt-sentence-jp {
+  font-size: 1.25em !important;
+  font-weight: 700 !important;
+  line-height: var(--jgt-line-height) !important;
+  color: var(--jgt-text) !important;
+}
+
+.jgt-grammar-highlight {
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  opacity: 0.95;
+}
+
+.jgt-translation-toggle {
+  margin-top: 8px;
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  color: var(--jgt-accent) !important;
+  font-weight: 600 !important;
+  font-size: 0.85em !important;
+  padding: 0 !important;
+}
+
+.jgt-translation-toggle:hover {
+  text-decoration: underline;
+}
+
+.jgt-translation-block {
+  margin-top: 8px;
+  background: transparent !important;
+  padding: 4px 0 0;
+}
+
+.jgt-translation-label {
+  font-size: 0.72em !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--jgt-accent) !important;
+  margin-bottom: 3px;
+}
+
+.jgt-translation-text {
+  color: var(--jgt-text) !important;
+}
+
+/* ---------- Grammar Found — collapsed rows, accordion expansion ---------- */
+
+.jgt-section-heading {
+  font-size: 0.78em !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--jgt-accent) !important;
+  margin-bottom: 6px;
+}
+
+.jgt-grammar-row {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  text-align: left !important;
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px;
+  padding: 7px 6px;
+  color: var(--jgt-text) !important;
+  font-size: 1em !important;
+  font-weight: 600 !important;
+}
+
+.jgt-grammar-row:hover {
+  background: var(--jgt-bg-elevated) !important;
+}
+
+.jgt-grammar-arrow {
+  color: var(--jgt-accent) !important;
+  font-size: 0.8em !important;
+  width: 1em;
+}
+
+.jgt-grammar-name {
+  color: var(--jgt-text) !important;
+}
+
+.jgt-grammar-detail {
+  padding: 4px 10px 12px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.jgt-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jgt-field-label {
+  font-size: 0.72em !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  color: var(--jgt-accent) !important;
+}
+
+.jgt-field-value {
+  color: var(--jgt-text) !important;
+  line-height: var(--jgt-line-height) !important;
+}
+
+.jgt-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.jgt-breakdown-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.jgt-breakdown-fragment {
+  font-weight: 700 !important;
+  color: var(--jgt-text) !important;
+  white-space: nowrap !important;
+}
+
+.jgt-breakdown-meaning {
+  color: var(--jgt-text-muted) !important;
+}
+
+/* ---------- Similar grammar — collapsed sub-list ---------- */
+
+.jgt-similar-section {
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--jgt-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jgt-similar-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.jgt-similar-toggle {
+  cursor: pointer;
+  text-align: left !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--jgt-text) !important;
+  font-weight: 600 !important;
+  font-size: 0.95em !important;
+  padding: 3px 0 !important;
+}
+
+.jgt-similar-toggle:hover {
+  color: var(--jgt-accent) !important;
+}
+
+.jgt-similar-note {
+  color: var(--jgt-text-muted) !important;
+  padding: 0 0 4px 16px;
+}
+
+/* Scrollbar polish (WebKit) */
+.jgt-panel-body::-webkit-scrollbar {
+  width: 7px;
+}
+.jgt-panel-body::-webkit-scrollbar-thumb {
+  background: var(--jgt-border);
+  border-radius: 999px;
+}
+
+/* ---------- Manual resize handle ---------- */
+
+.jgt-resize-handle {
+  position: absolute !important;
+  right: 2px !important;
+  bottom: 2px !important;
+  width: 14px !important;
+  height: 14px !important;
+  cursor: nwse-resize !important;
+  z-index: 2 !important;
+  background:
+    linear-gradient(135deg, transparent 0 40%, var(--jgt-border) 40% 46%, transparent 46% 60%, var(--jgt-border) 60% 66%, transparent 66% 100%) !important;
+  opacity: 0.7;
+}
+
+.jgt-resize-handle:hover {
+  opacity: 1;
+}
