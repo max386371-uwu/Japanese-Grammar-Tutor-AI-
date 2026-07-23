@@ -29,7 +29,7 @@ Select Japanese text on most webpages, click the floating **AI** button (or chos
 - ## Requirements
 
 - Chromium-based browser (Chrome, Brave, Edge)
-- Groq API key-
+- Groq API key
 
 ## Note on AI Provider Limits
 
@@ -42,7 +42,7 @@ If this happens, simply wait a short time and try again, or review your AI provi
 ## Installation 
 
 1. Get a free Groq API key at https://console.groq.com/keys
-2. `chrome://extensions` (or `brave://extensions`etc) → enable **Developer mode**
+2. `chrome://extensions` (or `brave://extensions` etc) → enable **Developer mode**
 3. **Load unpacked** → select this folder
 4. Click the extension icon → **Settings** → paste your API key → it autosaves
 5. Go to any page with Japanese text, select a sentence, click the small
