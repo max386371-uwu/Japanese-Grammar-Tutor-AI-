@@ -26,6 +26,11 @@ Select Japanese text on most webpages, click the floating **AI** button (or chos
 - ⚙️ Customizable settings (theme, font size, explanation level)
 - ⌨️ Keyboard shortcut support
 
+- ## Requirements
+
+- Chromium-based browser (Chrome, Brave, Edge)
+- Groq API key
+
 ## Installation 
 
 1. Get a free Groq API key at https://console.groq.com/keys
