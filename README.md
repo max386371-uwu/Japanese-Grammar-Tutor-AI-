@@ -31,7 +31,7 @@ Select Japanese text on most webpages, click the floating **AI** button (or chos
 - Chromium-based browser (Chrome, Brave, Edge)
 - Groq API key-
 
-#Note on AI Provider Limits
+## Note on AI Provider Limits
 
 This extension uses your own AI provider API key, which you configure in the extension's Settings. Your API key is stored locally and is never included in this repository.
 
