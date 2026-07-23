@@ -20,7 +20,7 @@ Select Japanese text on any webpage, click the floating **AI** button (or chosen
 3. **Load unpacked** → select this folder
 4. Click the extension icon → **Settings** → paste your API key → it autosaves
 5. Go to any page with Japanese text, select a sentence, click the small
-   blue "AI" button ("or hot key") that appears above your selection
+   blue "AI" button (or hot-key) that appears above your selection
 
 
 ## File structure
