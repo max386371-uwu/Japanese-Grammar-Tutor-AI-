@@ -1,6 +1,6 @@
 # Japanese-Grammar-Tutor-AI
 An AI-powered chromium extension that helps learners understand Japanese grammar directly from selected text.
-Select Japanese text on any webpage, click the floating **AI** button (or chosen hotkey), and receive a structured explanation including grammar, vocabulary, particles, conjugations, and translation.
+Select Japanese text on most webpages, click the floating **AI** button (or chosen hotkey), and receive a structured explanation including grammar, vocabulary, particles, conjugations, and translation.
 
 ## Features
 
@@ -13,7 +13,7 @@ Select Japanese text on any webpage, click the floating **AI** button (or chosen
 - ⚙️ Customizable settings (theme, font size, explanation level)
 - ⌨️ Keyboard shortcut support
 
-## Install 
+## Installation 
 
 1. Get a free Groq API key at https://console.groq.com/keys
 2. `chrome://extensions` (or `brave://extensions etc`) → enable **Developer mode**
