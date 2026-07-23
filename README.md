@@ -60,7 +60,7 @@ content/content.css           — panel + trigger button styles (dark/light, ani
 panel/panel.js                — panel shell, Show More toggles, action bar
 panel/components.js           — per-section DOM builders
 popup/popup.html|js|css       — toolbar popup for manual sentence entry
-options/options.html|js|css  — API key, theme, font size, explanation mode
+options/options.html|js|css   — API key, theme, font size, explanation mode
 lib/ai-client.js              — Groq fetch + JSON parsing
 lib/prompt-builder.js         — builds the structured prompt/schema
 lib/storage.js                — chrome.storage.local wrapper
