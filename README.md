@@ -29,7 +29,15 @@ Select Japanese text on most webpages, click the floating **AI** button (or chos
 - ## Requirements
 
 - Chromium-based browser (Chrome, Brave, Edge)
-- Groq API key
+- Groq API key-
+
+#Note on AI Provider Limits
+
+This extension uses your own AI provider API key, which you configure in the extension's Settings. Your API key is stored locally and is never included in this repository.
+
+Most AI providers (such as OpenAI, Anthropic, Google Gemini, OpenRouter, Groq, and others) enforce rate limits (for example, requests or tokens per minute). If you request many grammar explanations in a short period, you may temporarily reach your provider's limit and receive a rate limit error (such as HTTP 429).
+
+If this happens, simply wait a short time and try again, or review your AI provider's usage limits and plan. These limits are set by your chosen AI provider and are not imposed by this extension.
 
 ## Installation 
 
