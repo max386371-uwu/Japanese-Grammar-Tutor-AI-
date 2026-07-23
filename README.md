@@ -2,7 +2,7 @@
 An AI-powered chromium extension that helps learners understand Japanese grammar directly from selected text.
 Select Japanese text on most webpages, click the floating **AI** button (or chosen hotkey), and receive a structured explanation including grammar, vocabulary, particles, conjugations, and translation.
 
-##Images
+#Images
 
 <img width="350" height="350" alt="brave_MxOwfSlQ0p" src="https://github.com/user-attachments/assets/2e27f50e-6fc1-4414-b628-0e538639fd4f" />
 
@@ -15,7 +15,7 @@ Select Japanese text on most webpages, click the floating **AI** button (or chos
 
 
 
-## Features
+# Features
 
 - 📖 Floating AI button for selected Japanese text
 - 🤖 AI-powered grammar explanations using Groq
