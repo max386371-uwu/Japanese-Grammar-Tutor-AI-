@@ -3,11 +3,11 @@ An AI-powered chromium extension that helps learners understand Japanese grammar
 Select Japanese text on most webpages, click the floating **AI** button (or chosen hotkey), and receive a structured explanation including grammar, vocabulary, particles, conjugations, and translation.
 
 ##Images
-<img width="888" height="654" alt="brave_MxOwfSlQ0p" src="https://github.com/user-attachments/assets/2e27f50e-6fc1-4414-b628-0e538639fd4f" />
-<img width="761" height="645" alt="image" src="https://github.com/user-attachments/assets/98d7521d-d99b-45d2-852a-755947a01ed5" />
+<img width="488" height="354" alt="brave_MxOwfSlQ0p" src="https://github.com/user-attachments/assets/2e27f50e-6fc1-4414-b628-0e538639fd4f" />
+<img width="361" height="345" alt="image" src="https://github.com/user-attachments/assets/98d7521d-d99b-45d2-852a-755947a01ed5" />
 
-<img width="898" height="527" alt="image" src="https://github.com/user-attachments/assets/00d10b43-8816-43a7-a357-e5bed6ed6e25" />
-<img width="693" height="573" alt="brave_aAnrmd3BGi" src="https://github.com/user-attachments/assets/9d1fd91e-6a5b-4dc6-9f37-5d318baa77cd" />
+<img width="400" height="250" alt="image" src="https://github.com/user-attachments/assets/00d10b43-8816-43a7-a357-e5bed6ed6e25" />
+<img width="300" height="300" alt="brave_aAnrmd3BGi" src="https://github.com/user-attachments/assets/9d1fd91e-6a5b-4dc6-9f37-5d318baa77cd" />
 
 
 
