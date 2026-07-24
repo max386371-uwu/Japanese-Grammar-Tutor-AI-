@@ -67,5 +67,5 @@ lib/storage.js                — chrome.storage.local wrapper
 lib/constants.js              — shared keys/regex/message types
 icons/                        — placeholder icons
 ```
-Note: Just added follow up questions with the Ai, for diving deeper into the grammar, and made a few small changes like being able to chose more ai(s) then just Groq. And bookmarking grammar.
+Note: Just added follow up questions with the Ai, for diving deeper into the grammar, and made a few small changes like being able to choose more AIs then just Groq. And bookmarking grammar.
       
