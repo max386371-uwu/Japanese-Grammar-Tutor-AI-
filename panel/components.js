@@ -88,25 +88,38 @@
   }
 
   /**
-   * Sentence + "Show Translation" toggle. Translation is hidden by default
-   * unless expanded is true. Grammar points found in the sentence are
-   * highlighted inline in their category color, unless highlighting is
-   * disabled in settings.
+   * Sentence + "Show Translation" toggle + bookmark button. Translation is
+   * hidden by default unless expanded is true. Grammar points found in the
+   * sentence are highlighted inline in their category color, unless
+   * highlighting is disabled in settings.
    * @param {{sentence: string, translation: string, grammarPoints: Array<object>}} data
    * @param {boolean} translationExpanded
    * @param {boolean} highlightEnabled
+   * @param {boolean} bookmarked
    * @param {() => void} onToggleTranslation
+   * @param {() => void} onToggleBookmark
    * @returns {HTMLElement}
    */
-  function renderSentenceOverview(data, translationExpanded, highlightEnabled, onToggleTranslation) {
+  function renderSentenceOverview(data, translationExpanded, highlightEnabled, bookmarked, onToggleTranslation, onToggleBookmark) {
     const wrap = el('div', 'jgt-sentence-section');
+
+    const topRow = el('div', 'jgt-sentence-top-row');
     const sentenceNode = el('div', 'jgt-sentence-jp');
     if (highlightEnabled) {
       sentenceNode.append(buildHighlightedSentence(data.sentence || '', data.grammarPoints));
     } else {
       sentenceNode.textContent = data.sentence || '';
     }
-    wrap.append(sentenceNode);
+    topRow.append(sentenceNode);
+
+    const bookmarkBtn = el('button', 'jgt-bookmark-button', bookmarked ? '\u2605' : '\u2606');
+    bookmarkBtn.type = 'button';
+    bookmarkBtn.title = bookmarked ? 'Remove bookmark' : 'Save this explanation';
+    bookmarkBtn.classList.toggle('jgt-bookmark-active', bookmarked);
+    bookmarkBtn.addEventListener('click', onToggleBookmark);
+    topRow.append(bookmarkBtn);
+
+    wrap.append(topRow);
 
     const toggle = el('button', 'jgt-translation-toggle', translationExpanded ? '\u25bc Hide Translation' : '\u25bc Show Translation');
     toggle.type = 'button';
@@ -132,9 +145,22 @@
    * @param {boolean} autoExpandMode
    * @param {string[]} sentenceBreakdown shared full-sentence breakdown, rendered inside every expanded card
    * @param {(index: number) => void} onToggle
+   * @param {Map<number, Array<{role: string, text: string}>>} chatHistories per-grammar-point follow-up chat state
+   * @param {Set<number>} chatPendingSet indices currently awaiting an AI reply
+   * @param {(index: number, question: string) => void} onSendChat
    * @returns {HTMLElement}
    */
-  function renderGrammarFoundSection(grammarPoints, openIndex, multiExpandedSet, autoExpandMode, sentenceBreakdown, onToggle) {
+  function renderGrammarFoundSection(
+    grammarPoints,
+    openIndex,
+    multiExpandedSet,
+    autoExpandMode,
+    sentenceBreakdown,
+    onToggle,
+    chatHistories,
+    chatPendingSet,
+    onSendChat,
+  ) {
     const wrap = el('div', 'jgt-section jgt-grammar-section');
     wrap.append(el('div', 'jgt-section-heading', 'Grammar Found'));
 
@@ -156,7 +182,15 @@
       wrap.append(row);
 
       if (isOpen) {
-        wrap.append(renderGrammarDetail(point, sentenceBreakdown));
+        wrap.append(
+          renderGrammarDetail(
+            point,
+            sentenceBreakdown,
+            chatHistories.get(i) || [],
+            chatPendingSet.has(i),
+            (question) => onSendChat(i, question),
+          ),
+        );
       }
     }
 
@@ -166,9 +200,12 @@
   /**
    * @param {object} point
    * @param {Array<{fragment: string, meaning: string}>} sentenceBreakdown
+   * @param {Array<{role: string, text: string}>} chatHistory
+   * @param {boolean} chatPending
+   * @param {(question: string) => void} onSendChat
    * @returns {HTMLElement}
    */
-  function renderGrammarDetail(point, sentenceBreakdown) {
+  function renderGrammarDetail(point, sentenceBreakdown, chatHistory, chatPending, onSendChat) {
     const detail = el('div', 'jgt-grammar-detail');
 
     if (point.meaning) {
@@ -200,7 +237,65 @@
       detail.append(renderSimilarGrammar(point.similarGrammar));
     }
 
+    detail.append(renderChatSection(chatHistory, chatPending, onSendChat));
+
     return detail;
+  }
+
+  /**
+   * Follow-up chat scoped to this grammar point — a small message thread
+   * plus an input, kept separate per grammar point so it stays focused
+   * rather than becoming a general chatbot.
+   * @param {Array<{role: string, text: string}>} chatHistory
+   * @param {boolean} pending
+   * @param {(question: string) => void} onSendChat
+   * @returns {HTMLElement}
+   */
+  function renderChatSection(chatHistory, pending, onSendChat) {
+    const wrap = el('div', 'jgt-chat-section');
+    wrap.append(el('div', 'jgt-field-label', 'Ask a follow-up'));
+
+    if (chatHistory.length > 0) {
+      const thread = el('div', 'jgt-chat-thread');
+      for (const message of chatHistory) {
+        const bubble = el('div', `jgt-chat-bubble jgt-chat-bubble-${message.role}`, message.text);
+        thread.append(bubble);
+      }
+      wrap.append(thread);
+    }
+
+    if (pending) {
+      wrap.append(el('div', 'jgt-status jgt-chat-thinking', 'Thinking\u2026'));
+    }
+
+    const form = el('div', 'jgt-chat-input-row');
+    const input = /** @type {HTMLInputElement} */ (document.createElement('input'));
+    input.type = 'text';
+    input.className = 'jgt-chat-input';
+    input.placeholder = 'Ask about this grammar point\u2026';
+    input.disabled = pending;
+
+    const sendBtn = el('button', 'jgt-chat-send', 'Send');
+    sendBtn.type = 'button';
+    sendBtn.disabled = pending;
+
+    const submit = () => {
+      const question = input.value.trim();
+      if (!question || pending) return;
+      onSendChat(question);
+    };
+    sendBtn.addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      }
+    });
+
+    form.append(input, sendBtn);
+    wrap.append(form);
+
+    return wrap;
   }
 
   /**

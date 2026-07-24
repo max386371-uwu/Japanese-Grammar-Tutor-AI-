@@ -10,21 +10,19 @@
     <h1>Japanese Grammar Tutor</h1>
 
     <section class="jgto-card">
-      <h2>Groq API</h2>
+      <h2>AI Provider</h2>
       <label class="jgto-field">
-        <span>API key</span>
-        <input id="jgto-api-key" type="password" placeholder="gsk_..." autocomplete="off" />
+        <span>Provider</span>
+        <select id="jgto-provider"></select>
       </label>
-      <p class="jgto-hint">
-        Stored locally and only ever used by the background script to call Groq directly.
-        Get a key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.
-      </p>
+      <label class="jgto-field">
+        <span id="jgto-api-key-label">API key</span>
+        <input id="jgto-api-key" type="password" autocomplete="off" />
+      </label>
+      <p class="jgto-hint" id="jgto-api-key-hint"></p>
       <label class="jgto-field">
         <span>Model</span>
-        <select id="jgto-model">
-          <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
-          <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (faster, less detailed)</option>
-        </select>
+        <select id="jgto-model"></select>
       </label>
       <label class="jgto-field">
         <span>Default explanation level</span>
@@ -34,6 +32,7 @@
           <option value="advanced">Advanced (N1)</option>
         </select>
       </label>
+      <p class="jgto-hint">Each provider's API key and model choice are remembered separately, so switching providers never overwrites another provider's settings.</p>
     </section>
 
     <section class="jgto-card">
@@ -105,10 +104,6 @@
         <input type="checkbox" id="jgto-highlight-grammar" />
         <span>Highlight detected grammar directly in the sentence</span>
       </label>
-      <label class="jgto-checkbox jgto-checkbox-disabled">
-        <input type="checkbox" disabled />
-        <span>Explain only unknown grammar <em>(coming soon)</em></span>
-      </label>
       <label class="jgto-checkbox">
         <input type="checkbox" id="jgto-auto-expand" />
         <span>Automatically expand all grammar explanations</span>
@@ -126,11 +121,17 @@
         <span>Show the floating 説 button when Japanese text is selected</span>
       </label>
       <p class="jgto-hint">
-        Default hotkey: <kbd>Ctrl+Shift+A</kbd> (<kbd>Cmd+Shift+A</kbd> on Mac). To change it, open
+        Default hotkey: <kbd>Alt+G</kbd> (<kbd>Cmd+Shift+A</kbd> on Mac). To change it, open
         <code>chrome://extensions/shortcuts</code> and find "Japanese Grammar Tutor". A right-click
         menu entry ("説 Explain Japanese grammar") is also available on any text selection.
       </p>
       <button id="jgto-open-shortcuts" type="button">Open shortcut settings</button>
+    </section>
+
+    <section class="jgto-card">
+      <h2>Bookmarks</h2>
+      <p class="jgto-hint">Explanations you've saved with the \u2606 button in the popup.</p>
+      <button id="jgto-open-bookmarks" type="button">Open bookmarks</button>
     </section>
 
     <section class="jgto-card">

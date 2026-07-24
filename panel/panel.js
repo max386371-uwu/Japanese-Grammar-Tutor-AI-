@@ -15,6 +15,7 @@
 
 (function () {
   const {el} = window.JGTComponents;
+  const {STORAGE_KEYS, MESSAGE_TYPES} = window.JGT_CONSTANTS;
 
   const DEFAULT_MAX_HEIGHT = 460; // fallback only, real value comes from visual.popupMaxHeight
 
@@ -31,6 +32,12 @@
   let multiExpandedSet = new Set();
   /** @type {boolean} */
   let translationExpanded = false;
+  /** @type {boolean} whether the currently-shown sentence is bookmarked */
+  let bookmarked = false;
+  /** @type {Map<number, Array<{role: 'user'|'assistant', text: string}>>} follow-up chat, per grammar point index */
+  let chatHistories = new Map();
+  /** @type {Set<number>} grammar point indices currently awaiting a chat reply */
+  let chatPendingSet = new Set();
 
   /** @type {object} last-opened visual settings + anchor, reused by follow-up requests */
   let lastState = {
@@ -115,6 +122,9 @@
     openGrammarIndex = null;
     multiExpandedSet = new Set();
     translationExpanded = lastState.autoShowTranslation;
+    bookmarked = false;
+    chatHistories = new Map();
+    chatPendingSet = new Set();
 
     const root = ensureRoot();
     closePanelImmediate();
@@ -281,6 +291,127 @@
     }
 
     renderResultInPlace(data, meta);
+    void refreshBookmarkStatus(meta.sentence, data, meta);
+  }
+
+  /**
+   * @returns {Promise<Array<object>>}
+   */
+  function getBookmarks() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get([STORAGE_KEYS.BOOKMARKS], (result) => {
+          if (chrome.runtime.lastError) {
+            resolve([]);
+            return;
+          }
+          resolve(Array.isArray(result[STORAGE_KEYS.BOOKMARKS]) ? result[STORAGE_KEYS.BOOKMARKS] : []);
+        });
+      } catch {
+        resolve([]);
+      }
+    });
+  }
+
+  /**
+   * @param {Array<object>} bookmarks
+   * @returns {Promise<void>}
+   */
+  function setBookmarks(bookmarks) {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.set({[STORAGE_KEYS.BOOKMARKS]: bookmarks}, () => resolve());
+      } catch {
+        resolve();
+      }
+    });
+  }
+
+  /**
+   * @param {string} sentence
+   * @param {object} data
+   * @param {{sentence: string}} meta
+   */
+  async function checkAndToggleBookmark(sentence, data, meta) {
+    const bookmarks = await getBookmarks();
+    const existingIndex = bookmarks.findIndex((b) => b.sentence === sentence);
+    if (existingIndex !== -1) {
+      bookmarks.splice(existingIndex, 1);
+      await setBookmarks(bookmarks);
+      bookmarked = false;
+    } else {
+      bookmarks.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        sentence,
+        translation: data.translation || '',
+        grammarPoints: data.grammarPoints || [],
+        sentenceBreakdown: data.sentenceBreakdown || [],
+        savedAt: Date.now(),
+      });
+      await setBookmarks(bookmarks);
+      bookmarked = true;
+    }
+    renderResultInPlace(data, meta);
+  }
+
+  /**
+   * @param {string} sentence
+   * @returns {Promise<void>}
+   */
+  async function refreshBookmarkStatus(sentence, data, meta) {
+    const bookmarks = await getBookmarks();
+    const isBookmarked = bookmarks.some((b) => b.sentence === sentence);
+    if (isBookmarked !== bookmarked) {
+      bookmarked = isBookmarked;
+      renderResultInPlace(data, meta);
+    }
+  }
+
+  /**
+   * Sends a follow-up chat question scoped to one grammar point, updating
+   * chat state and re-rendering as the reply comes back.
+   * @param {number} index
+   * @param {string} question
+   * @param {object} data
+   * @param {{sentence: string}} meta
+   */
+  function sendChatMessage(index, question, data, meta) {
+    const point = data.grammarPoints?.[index];
+    if (!point) return;
+
+    const history = chatHistories.get(index) || [];
+    history.push({role: 'user', text: question});
+    chatHistories.set(index, history);
+    chatPendingSet.add(index);
+    renderResultInPlace(data, meta);
+
+    const summary = [point.meaning, point.formation, point.nuance].filter(Boolean).join(' ');
+
+    chrome.runtime.sendMessage(
+      {
+        type: MESSAGE_TYPES.CHAT_FOLLOWUP_REQUEST,
+        payload: {
+          sentence: meta.sentence,
+          grammarPointName: point.displayName || '',
+          grammarPointSummary: summary,
+          history: history.slice(0, -1),
+          question,
+        },
+      },
+      (response) => {
+        chatPendingSet.delete(index);
+        const currentHistory = chatHistories.get(index) || [];
+        if (chrome.runtime.lastError) {
+          currentHistory.push({role: 'assistant', text: `(Could not reach the extension: ${chrome.runtime.lastError.message})`});
+        } else if (!response?.ok) {
+          currentHistory.push({role: 'assistant', text: `(Error: ${response?.error || 'something went wrong'})`});
+        } else {
+          currentHistory.push({role: 'assistant', text: response.reply});
+        }
+        chatHistories.set(index, currentHistory);
+        renderResultInPlace(data, meta);
+      },
+    );
   }
 
   /**
@@ -297,9 +428,13 @@
         {sentence: meta.sentence, translation: data.translation, grammarPoints: data.grammarPoints},
         translationExpanded,
         lastState.highlightGrammar,
+        bookmarked,
         () => {
           translationExpanded = !translationExpanded;
           renderResultInPlace(data, meta);
+        },
+        () => {
+          void checkAndToggleBookmark(meta.sentence, data, meta);
         },
       ),
     );
@@ -320,6 +455,9 @@
           }
           renderResultInPlace(data, meta);
         },
+        chatHistories,
+        chatPendingSet,
+        (index, question) => sendChatMessage(index, question, data, meta),
       ),
     );
 

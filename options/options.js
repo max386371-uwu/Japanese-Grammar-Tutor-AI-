@@ -1,13 +1,9 @@
 import '../lib/constants.js';
 import {getSettings, setSettings} from '../lib/storage.js';
 
-const {STORAGE_KEYS, DEFAULT_SETTINGS} = globalThis.JGT_CONSTANTS;
+const {STORAGE_KEYS, DEFAULT_SETTINGS, PROVIDERS_META} = globalThis.JGT_CONSTANTS;
 
 const fields = {
-  apiKey: document.getElementById('jgto-api-key'),
-  model: document.getElementById('jgto-model'),
-  mode: document.getElementById('jgto-mode'),
-
   fontSize: document.getElementById('jgto-font-size'),
   lineSpacing: document.getElementById('jgto-line-spacing'),
   popupWidth: document.getElementById('jgto-popup-width'),
@@ -18,6 +14,7 @@ const fields = {
   accentColor: document.getElementById('jgto-accent-color'),
   bgColor: document.getElementById('jgto-bg-color'),
   fontFamily: document.getElementById('jgto-font-family'),
+  mode: document.getElementById('jgto-mode'),
 
   explainParticles: document.getElementById('jgto-explain-particles'),
   explainConjugations: document.getElementById('jgto-explain-conjugations'),
@@ -30,16 +27,96 @@ const fields = {
   featuresEnabled: document.getElementById('jgto-features-enabled'),
 };
 
+const providerSelect = document.getElementById('jgto-provider');
+const apiKeyInput = document.getElementById('jgto-api-key');
+const apiKeyLabel = document.getElementById('jgto-api-key-label');
+const apiKeyHint = document.getElementById('jgto-api-key-hint');
+const modelSelect = document.getElementById('jgto-model');
+
 const saveStatus = document.getElementById('jgto-save-status');
 document.getElementById('jgto-open-shortcuts').addEventListener('click', () => {
   chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
+});
+document.getElementById('jgto-open-bookmarks').addEventListener('click', () => {
+  chrome.tabs.create({url: chrome.runtime.getURL('bookmarks/bookmarks.html')});
+});
+
+/** @type {string} */
+let currentProvider = DEFAULT_SETTINGS[STORAGE_KEYS.PROVIDER];
+/** @type {Record<string, string>} */
+let apiKeysByProvider = {};
+/** @type {Record<string, string>} */
+let modelsByProvider = {...DEFAULT_SETTINGS[STORAGE_KEYS.MODELS_BY_PROVIDER]};
+
+function buildProviderOptions() {
+  providerSelect.innerHTML = '';
+  for (const p of PROVIDERS_META) {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.label;
+    providerSelect.append(opt);
+  }
+}
+
+/**
+ * Rebuilds the API-key/model fields for whichever provider is currently
+ * selected, without touching other providers' stored values.
+ */
+function renderProviderFields() {
+  const meta = PROVIDERS_META.find((p) => p.id === currentProvider) || PROVIDERS_META[0];
+
+  providerSelect.value = meta.id;
+  apiKeyLabel.textContent = `${meta.label} API key`;
+  apiKeyInput.placeholder = meta.keyPlaceholder;
+  apiKeyInput.value = apiKeysByProvider[meta.id] || '';
+  apiKeyHint.innerHTML = `Stored locally and only ever used by the background script to call ${meta.label} directly. Get a key at <a href="${meta.keyHelpUrl}" target="_blank" rel="noopener">${meta.keyHelpUrl.replace('https://', '')}</a>.`;
+
+  modelSelect.innerHTML = '';
+  for (const modelId of meta.models) {
+    const opt = document.createElement('option');
+    opt.value = modelId;
+    opt.textContent = modelId;
+    modelSelect.append(opt);
+  }
+  modelSelect.value = modelsByProvider[meta.id] || meta.models[0];
+}
+
+providerSelect.addEventListener('change', () => {
+  currentProvider = providerSelect.value;
+  renderProviderFields();
+  scheduleSave();
+});
+
+apiKeyInput.addEventListener('input', () => {
+  apiKeysByProvider = {...apiKeysByProvider, [currentProvider]: apiKeyInput.value.trim()};
+  scheduleSave();
+});
+
+modelSelect.addEventListener('change', () => {
+  modelsByProvider = {...modelsByProvider, [currentProvider]: modelSelect.value};
+  scheduleSave();
 });
 
 async function load() {
   const stored = await getSettings(Object.values(STORAGE_KEYS));
 
-  fields.apiKey.value = stored[STORAGE_KEYS.API_KEY] || '';
-  fields.model.value = stored[STORAGE_KEYS.MODEL] || DEFAULT_SETTINGS[STORAGE_KEYS.MODEL];
+  currentProvider = stored[STORAGE_KEYS.PROVIDER] || DEFAULT_SETTINGS[STORAGE_KEYS.PROVIDER];
+  apiKeysByProvider = {...(stored[STORAGE_KEYS.API_KEYS_BY_PROVIDER] || {})};
+  modelsByProvider = {...DEFAULT_SETTINGS[STORAGE_KEYS.MODELS_BY_PROVIDER], ...(stored[STORAGE_KEYS.MODELS_BY_PROVIDER] || {})};
+
+  // One-time migration for pre-multi-provider installs: fold the old flat
+  // Groq-only key/model into the new per-provider maps if not already set.
+  // (background.js does the same migration independently — both are
+  // idempotent, so running it here too just keeps the UI in sync
+  // immediately rather than waiting for the next explain request.)
+  const legacyApiKey = stored[STORAGE_KEYS.LEGACY_API_KEY];
+  const legacyModel = stored[STORAGE_KEYS.LEGACY_MODEL];
+  if (legacyApiKey && !apiKeysByProvider.groq) apiKeysByProvider = {...apiKeysByProvider, groq: legacyApiKey};
+  if (legacyModel && !stored[STORAGE_KEYS.MODELS_BY_PROVIDER]?.groq) modelsByProvider = {...modelsByProvider, groq: legacyModel};
+
+  buildProviderOptions();
+  renderProviderFields();
+
   fields.mode.value = stored[STORAGE_KEYS.EXPLANATION_MODE] || DEFAULT_SETTINGS[STORAGE_KEYS.EXPLANATION_MODE];
 
   fields.fontSize.value = stored[STORAGE_KEYS.FONT_SIZE] ?? DEFAULT_SETTINGS[STORAGE_KEYS.FONT_SIZE];
@@ -72,8 +149,9 @@ function scheduleSave() {
 
 async function save() {
   await setSettings({
-    [STORAGE_KEYS.API_KEY]: fields.apiKey.value.trim(),
-    [STORAGE_KEYS.MODEL]: fields.model.value,
+    [STORAGE_KEYS.PROVIDER]: currentProvider,
+    [STORAGE_KEYS.API_KEYS_BY_PROVIDER]: apiKeysByProvider,
+    [STORAGE_KEYS.MODELS_BY_PROVIDER]: modelsByProvider,
     [STORAGE_KEYS.EXPLANATION_MODE]: fields.mode.value,
 
     [STORAGE_KEYS.FONT_SIZE]: Number(fields.fontSize.value) || DEFAULT_SETTINGS[STORAGE_KEYS.FONT_SIZE],

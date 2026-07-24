@@ -128,6 +128,32 @@
   font-weight: 700 !important;
   line-height: var(--jgt-line-height) !important;
   color: var(--jgt-text) !important;
+  flex: 1;
+}
+
+.jgt-sentence-top-row {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.jgt-bookmark-button {
+  flex: none;
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  color: var(--jgt-text-muted) !important;
+  font-size: 1.3em !important;
+  line-height: 1 !important;
+  padding: 0 2px !important;
+}
+
+.jgt-bookmark-button:hover {
+  color: var(--jgt-accent) !important;
+}
+
+.jgt-bookmark-active {
+  color: var(--jgt-accent) !important;
 }
 
 .jgt-grammar-highlight {
@@ -294,6 +320,80 @@
 .jgt-similar-note {
   color: var(--jgt-text-muted) !important;
   padding: 0 0 4px 16px;
+}
+
+/* ---------- Follow-up chat, scoped per grammar point ---------- */
+
+.jgt-chat-section {
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--jgt-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jgt-chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jgt-chat-bubble {
+  padding: 6px 9px;
+  border-radius: 8px;
+  max-width: 90%;
+  line-height: 1.45 !important;
+}
+
+.jgt-chat-bubble-user {
+  align-self: flex-end;
+  background: var(--jgt-accent) !important;
+  color: #ffffff !important;
+}
+
+.jgt-chat-bubble-assistant {
+  align-self: flex-start;
+  background: var(--jgt-bg-elevated, color-mix(in srgb, var(--jgt-bg) 92%, #ffffff 8%)) !important;
+  color: var(--jgt-text) !important;
+}
+
+.jgt-chat-thinking {
+  align-self: flex-start;
+}
+
+.jgt-chat-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.jgt-chat-input {
+  flex: 1;
+  background: var(--jgt-bg-elevated, color-mix(in srgb, var(--jgt-bg) 92%, #ffffff 8%)) !important;
+  color: var(--jgt-text) !important;
+  border: 1px solid var(--jgt-border) !important;
+  border-radius: 999px;
+  padding: 6px 12px !important;
+  font-size: 0.9em !important;
+  font-family: var(--jgt-font-family) !important;
+}
+
+.jgt-chat-send {
+  flex: none;
+  cursor: pointer;
+  background: var(--jgt-accent) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px;
+  padding: 6px 14px !important;
+  font-size: 0.85em !important;
+  font-weight: 600 !important;
+}
+
+.jgt-chat-send:disabled,
+.jgt-chat-input:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* Scrollbar polish (WebKit) */

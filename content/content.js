@@ -12,11 +12,42 @@
   let lastSelectionContext = null;
   /** @type {?{top: number, left: number, bottom: number, right: number}} */
   let lastSelectionRect = null;
+  /** @type {boolean} whether the floating 説 button should appear on selection — cached locally so every selectionchange doesn't need an async storage read */
+  let featuresEnabled = DEFAULT_SETTINGS[STORAGE_KEYS.FEATURES_ENABLED];
+
+  initFeaturesEnabledCache();
+
+  function initFeaturesEnabledCache() {
+    try {
+      if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) return;
+      chrome.storage.local.get([STORAGE_KEYS.FEATURES_ENABLED], (result) => {
+        if (chrome.runtime.lastError) return;
+        if (typeof result[STORAGE_KEYS.FEATURES_ENABLED] === 'boolean') {
+          featuresEnabled = result[STORAGE_KEYS.FEATURES_ENABLED];
+        }
+      });
+      chrome.storage.onChanged?.addListener((changes, areaName) => {
+        if (areaName !== 'local') return;
+        const change = changes[STORAGE_KEYS.FEATURES_ENABLED];
+        if (change && typeof change.newValue === 'boolean') {
+          featuresEnabled = change.newValue;
+          if (!featuresEnabled) removeTriggerButton();
+        }
+      });
+    } catch {
+      // Storage unavailable on this page — keep the default.
+    }
+  }
 
   document.addEventListener('selectionchange', onSelectionChange);
   chrome.runtime.onMessage.addListener(onRuntimeMessage);
 
   function onSelectionChange() {
+    if (!featuresEnabled) {
+      removeTriggerButton();
+      return;
+    }
+
     const selection = window.getSelection();
     const text = selection ? selection.toString().trim() : '';
 
@@ -68,7 +99,7 @@
     triggerButton.id = 'jgt-trigger-button';
     triggerButton.type = 'button';
     triggerButton.textContent = '\u8aac'; // 説
-    triggerButton.title = 'Explain grammar (Ctrl+Shift+A)';
+    triggerButton.title = 'Explain grammar (Alt+G / Cmd+Shift+A on Mac)';
     Object.assign(triggerButton.style, {
       position: 'fixed',
       top: `${Math.max(4, rect.top - 32)}px`,
